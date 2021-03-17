@@ -30,7 +30,7 @@ station_no=52908  # wu dao liang station
 
 
 #data from 1956-2017
-cma_dir="/Users/huanglingcao/Data/meteorological_data/CMA_data/中国地面气候资料日值数据集V3.0 1956-2017/v3.0日数据"
+cma_dir="~/Data/CMA_data/中国地面气候资料日值数据集V3.0 1956-2017/v3.0日数据"
 ## plot precipitation (there are a few folders, don't know which one)
 #plot_meteo_series.py "${cma_dir}"/全降水 -s ${station_no} -d pre
 
@@ -38,7 +38,7 @@ cma_dir="/Users/huanglingcao/Data/meteorological_data/CMA_data/中国地面气�
 #plot_meteo_series.py "${cma_dir}"/gst_data -s ${station_no} -d gst
 
 # plot air temperature
-plot_meteo_series.py "${cma_dir}"/气温tem -s ${station_no} -d tem
+python plot_meteo_series.py "${cma_dir}"/气温tem -s ${station_no} -d tem
 
 
 

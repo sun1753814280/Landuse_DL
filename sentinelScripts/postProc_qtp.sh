@@ -86,8 +86,10 @@ cd ${inf_dir}
     ## remove polygons based on an attributes values
     ${eo_dir}/sentinelScripts/remove_mappedPolygons.py -p ${para_file} -o ${shp_pre}_post.shp ${shp_pre}_post_NOrm.shp
 
+    ## evaluate the mapping results based on pixel
+    ${deeplabRS}/evaluation_result.py -p ${para_file} ${shp_pre}_post.shp I${n}_${output}
     ## evaluate the mapping results
-    ${deeplabRS}/evaluation_result.py -p ${para_file} ${shp_pre}_post.shp
+    #${deeplabRS}/evaluation_result.py -p ${para_file} ${shp_pre}_post.shp
 
     cd -
 
