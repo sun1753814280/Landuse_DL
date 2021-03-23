@@ -267,7 +267,7 @@ def postProcess(para_file,inf_post_note, b_skip_getshp=False,test_id=None):
     else:
         out_table = os.path.join(backup_dir, '_'.join([test_id, 'accuracy_table']) + '.xlsx')
     eva_reports = [ region_eva_reports[key] for key in region_eva_reports]
-    eva_report_to_tables.eva_reports_to_table(eva_reports, out_table)
+    #eva_report_to_tables.eva_reports_to_table(eva_reports, out_table)
 
     duration= time.time() - SECONDS
     os.system('echo "$(date): time cost of post-procesing: %.2f seconds">>time_cost.txt'%duration)
