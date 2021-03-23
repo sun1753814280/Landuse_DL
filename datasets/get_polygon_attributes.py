@@ -124,8 +124,10 @@ def calculate_polygon_topography(polygons_shp,para_file, dem_files,slope_files,a
     # #slope
     if slope_files is not None:
         stats_list = ['min', 'max','mean', 'median', 'std']
-        if zonal_stats_multiRasters(polygons_shp,slope_files,stats=stats_list,prefix='slo',band=1,all_touched=all_touched, process_num=process_num) is False:
+        if operation_obj.add_fields_from_raster(polygons_shp, slope_files, "slo", band=1, stats_list=stats_list,all_touched=all_touched) is False:
             return False
+        #if zonal_stats_multiRasters(polygons_shp,slope_files,stats=stats_list,prefix='slo',band=1,all_touched=all_touched, process_num=process_num) is False:
+        #    return False
     else:
         basic.outputlogMessage("warning, slope file not exist, skip the calculation of slope information")
 
