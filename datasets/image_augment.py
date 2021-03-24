@@ -233,7 +233,7 @@ def noise(image_np, save_dir, input_filename,is_groud_true, out_count=1):
             # just copy the groud true
             images_noise = image_np
         else:
-            noise = iaa.AdditiveGaussianNoise(scale=(0, 0.2*255))  # a random gamma value between the range
+            noise = iaa.arithmetic.AdditiveGaussianNoise(scale=(0, 0.2*255))  # a random gamma value between the range
             images_noise = noise.augment_image(image_np)
         io.imsave(save_path, images_noise)
 
