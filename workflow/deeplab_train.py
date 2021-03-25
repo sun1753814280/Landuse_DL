@@ -699,7 +699,7 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
     if os.path.isdir(backup_dir) is False:
         io_function.mkdir(backup_dir)
     new_iou_name = os.path.join(backup_dir, test_id+ '_'+os.path.basename(iou_path))
-    new_iou_training_name = os.path.join(backup_dir, test_id + '_' + os.path.basename(iou_training_path))
+    # new_iou_training_name = os.path.join(backup_dir, test_id + '_' + os.path.basename(iou_training_path))
     io_function.copy_file_to_dst(iou_path, new_iou_name, overwrite=True)
 
     loss_new_name = os.path.join(backup_dir,test_id+ '_'+os.path.basename(loss_path))
