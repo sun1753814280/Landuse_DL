@@ -610,7 +610,8 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
             # run evaluation and wait until it finished
             gpuid = ""  # set gpuid to empty string, making evaluation run on CPU
             evl_script = os.path.join(deeplab_dir, 'eval.py')
-            evl_split = os.path.splitext(parameters.get_string_parameters(para_file, 'validation_sample_list_txt'))[0]
+            # evl_split = os.path.splitext(parameters.get_string_parameters(para_file, 'validation_sample_list_txt'))[0]
+            evl_split = os.path.splitext(parameters.get_string_parameters(para_file, 'training_sample_list_txt'))[0]
             # max_eva_number = -1  # run as many evaluation as possible, --eval_interval_secs (default is 300 seconds)
             max_eva_number = 1  # only run once inside the while loop, use while loop to control multiple evaluation
             eval_process = Process(target=evaluation_deeplab,
