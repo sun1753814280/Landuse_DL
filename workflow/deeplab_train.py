@@ -178,6 +178,7 @@ def evaluation_deeplab(evl_script,dataset, evl_split,num_of_classes, model_varia
     if res != 0:
         sys.exit(1)
 
+
 def get_loss_learning_rate_list(log_dir):
 
     # add the tensorboard in the tf1x version
@@ -602,7 +603,7 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
         already_trained_iteration = get_trained_iteration(TRAIN_LOGDIR)
         miou_dict = get_miou_list_class_all(EVAL_LOGDIR, num_of_classes)
         # evaluate performance on training examples
-        miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
+        # miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
         basic.outputlogMessage('Already trained iteration: %d, latest evaluation at %d step'%(already_trained_iteration, miou_dict['step'][-1]))
         if already_trained_iteration > miou_dict['step'][-1]:
 
@@ -623,23 +624,11 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
             while eval_process.is_alive():
                 time.sleep(5)
 
-            evl_training_split = os.path.splitext(parameters.get_string_parameters(para_file, 'training_sample_list_txt'))[0]
-            eval_training_process = Process(target=evaluation_deeplab,
-                                args=(evl_script, dataset, evl_training_split, num_of_classes, model_variant,
-                                        inf_atrous_rates1, inf_atrous_rates2, inf_atrous_rates3, inf_output_stride,
-                                        TRAIN_LOGDIR, EVAL_LOGDIR,
-                                        dataset_dir, crop_size_str, max_eva_number, depth_multiplier,
-                                        decoder_output_stride, aspp_convs_filters,
-                                        gpuid, eval_interval_secs))
-            eval_training_process.start()  # put Process inside while loop to avoid error: AssertionError: cannot start a process twice
-            while eval_training_process.is_alive():
-                time.sleep(5)
-
         # check if need early stopping
         if b_early_stopping:
             print(datetime.now(), 'check early stopping')
             miou_dict = get_miou_list_class_all(EVAL_LOGDIR, num_of_classes)
-            miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
+            # miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
             if 'overall' in miou_dict.keys() and  len(miou_dict['overall']) >= 5:
                 # if the last five miou did not improve, then stop training
                 if np.all(np.diff(miou_dict['overall'][-5:]) < 0.005): # 0.0001 (%0.01)  # 0.5 %
@@ -665,7 +654,6 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
         # if the evaluation step is less than saved model iteration, run another iteration again immediately
         already_trained_iteration = get_trained_iteration(TRAIN_LOGDIR)
         miou_dict = get_miou_list_class_all(EVAL_LOGDIR, num_of_classes)
-        miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
         if already_trained_iteration > miou_dict['step'][-1]:
             continue
 
@@ -682,11 +670,22 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
     get_loss_learning_rate_list(TRAIN_LOGDIR)
     # get miou again
     miou_dict = get_miou_list_class_all(EVAL_LOGDIR, num_of_classes)
-    miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
 
     # eval_process did not exit as expected, kill it again.
     # os.system('kill ' + str(eval_process.pid))
 
+    evl_training_split = os.path.splitext(parameters.get_string_parameters(para_file, 'training_sample_list_txt'))[0]
+    eval_training_process = Process(target=evaluation_deeplab,
+                        args=(evl_script, dataset, evl_training_split, num_of_classes, model_variant,
+                                inf_atrous_rates1, inf_atrous_rates2, inf_atrous_rates3, inf_output_stride,
+                                TRAIN_LOGDIR, TRAIN_LOGDIR,
+                                dataset_dir, crop_size_str, max_eva_number, depth_multiplier,
+                                decoder_output_stride, aspp_convs_filters,
+                                gpuid, eval_interval_secs))
+    eval_training_process.start()  # put Process inside while loop to avoid error: AssertionError: cannot start a process twice
+    while eval_training_process.is_alive():
+        time.sleep(5)
+    miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
 
     # get iou and backup
     iou_path = os.path.join(EVAL_LOGDIR, 'miou.txt')
