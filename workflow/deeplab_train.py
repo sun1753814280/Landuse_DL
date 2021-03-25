@@ -674,22 +674,22 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
     # eval_process did not exit as expected, kill it again.
     # os.system('kill ' + str(eval_process.pid))
 
-    evl_training_split = os.path.splitext(parameters.get_string_parameters(para_file, 'training_sample_list_txt'))[0]
-    eval_training_process = Process(target=evaluation_deeplab,
-                        args=(evl_script, dataset, evl_training_split, num_of_classes, model_variant,
-                                inf_atrous_rates1, inf_atrous_rates2, inf_atrous_rates3, inf_output_stride,
-                                TRAIN_LOGDIR, TRAIN_LOGDIR,
-                                dataset_dir, crop_size_str, max_eva_number, depth_multiplier,
-                                decoder_output_stride, aspp_convs_filters,
-                                gpuid, eval_interval_secs))
-    eval_training_process.start()  # put Process inside while loop to avoid error: AssertionError: cannot start a process twice
-    while eval_training_process.is_alive():
-        time.sleep(5)
-    miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
+    # evl_training_split = os.path.splitext(parameters.get_string_parameters(para_file, 'training_sample_list_txt'))[0]
+    # eval_training_process = Process(target=evaluation_deeplab,
+    #                     args=(evl_script, dataset, evl_training_split, num_of_classes, model_variant,
+    #                             inf_atrous_rates1, inf_atrous_rates2, inf_atrous_rates3, inf_output_stride,
+    #                             TRAIN_LOGDIR, TRAIN_LOGDIR,
+    #                             dataset_dir, crop_size_str, max_eva_number, depth_multiplier,
+    #                             decoder_output_stride, aspp_convs_filters,
+    #                             gpuid, eval_interval_secs))
+    # eval_training_process.start()  # put Process inside while loop to avoid error: AssertionError: cannot start a process twice
+    # while eval_training_process.is_alive():
+    #     time.sleep(5)
+    # miou_training_dict = get_miou_list_class_all(TRAIN_LOGDIR, num_of_classes)
 
     # get iou and backup
     iou_path = os.path.join(EVAL_LOGDIR, 'miou.txt')
-    iou_training_path = os.path.join(TRAIN_LOGDIR, 'miou.txt')
+    # iou_training_path = os.path.join(TRAIN_LOGDIR, 'miou.txt')
     loss_path = os.path.join(TRAIN_LOGDIR, 'loss_learning_rate.txt')
     patch_info = os.path.join(WORK_DIR, 'sub_images_patches_info.txt')
 
@@ -710,12 +710,12 @@ def train_evaluation_deeplab_separate(WORK_DIR,deeplab_dir,expr_name, para_file,
 
     # plot mIOU, loss, and learnint rate curves, and backup
     miou_curve_path = plot_miou_loss_curve.plot_miou_loss_main(iou_path,train_count=train_count, val_count=val_count,batch_size=batch_size)
-    miou_training_curve_path = plot_miou_loss_curve.plot_miou_loss_main(iou_training_path, train_count=train_count, val_count=val_count,batch_size=batch_size)
+    # miou_training_curve_path = plot_miou_loss_curve.plot_miou_loss_main(iou_training_path, train_count=train_count, val_count=val_count,batch_size=batch_size)
     loss_curve_path = plot_miou_loss_curve.plot_miou_loss_main(loss_path,train_count=train_count, val_count=val_count,batch_size=batch_size)
     miou_curve_bakname = os.path.join(backup_dir, test_id+ '_'+os.path.basename(miou_curve_path))
-    miou_training_curve_bakname = os.path.join(backup_dir, test_id + '_' + os.path.basename(miou_training_curve_path))
+    # miou_training_curve_bakname = os.path.join(backup_dir, test_id + '_' + os.path.basename(miou_training_curve_path))
     io_function.copy_file_to_dst(miou_curve_path, miou_curve_bakname, overwrite=True)
-    io_function.copy_file_to_dst(miou_training_curve_path, miou_training_curve_bakname, overwrite=True)
+    # io_function.copy_file_to_dst(miou_training_curve_path, miou_training_curve_bakname, overwrite=True)
     loss_curve_bakname = os.path.join(backup_dir, test_id+ '_'+os.path.basename(loss_curve_path))
     io_function.copy_file_to_dst(loss_curve_path, loss_curve_bakname, overwrite=True)
 
