@@ -11,6 +11,7 @@ add time: 21 January, 2021
 import os, sys
 from optparse import OptionParser
 
+## git test
 # code_dir = os.path.join(os.path.dirname(sys.argv[0]), '..')
 code_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 sys.path.insert(0, code_dir)
