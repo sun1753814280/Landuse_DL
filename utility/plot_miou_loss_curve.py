@@ -19,6 +19,7 @@ import basic_src.basic as basic
 
 import matplotlib
 # must be before importing matplotlib.pyplot or pylab!
+
 # if os.name == 'posix' and "DISPLAY" not in os.environ:
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
