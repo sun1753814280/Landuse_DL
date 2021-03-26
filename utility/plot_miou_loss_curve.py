@@ -87,7 +87,7 @@ def plot_miou_step_time(miou_dict, save_path,train_count, val_count,batch_size):
     ax1.grid(axis='y', alpha=0.75)
 
     # ax1.legend(fontsize=10, loc="best")  # loc="upper left"
-    ax1.legend(fontsize=10, loc="upper left")  # loc="upper left"
+    ax1.legend(fontsize=10, loc="lower right")  # loc="upper left"
     if train_count is not None and val_count is not None and batch_size is not None:
         ax1.set_xlabel('Training iteration (Count of train & val: %d & %d, batch_size=%d)'%(train_count,val_count,batch_size))
     else:
@@ -96,7 +96,7 @@ def plot_miou_step_time(miou_dict, save_path,train_count, val_count,batch_size):
 
     plt.tight_layout()  # adjust the layout, avoid cutoff some label to title
 
-    plt.savefig(save_path, dpi=300)  # 300
+    plt.savefig(save_path, dpi=200)  # 300
     basic.outputlogMessage('save to %s'%save_path)
 
 
