@@ -151,6 +151,17 @@ def remove_polygons_main(polygons_shp, output, para_file):
     else:
         basic.outputlogMessage('warning, target_outline_shp is absent in the para file, skip removing polygons based on outlines')
 
+    # remove super narrow polygons based on ratio_w_h
+    ratio_w_h_thr = parameters.get_digit_parameters_None_if_absence(para_file,'minimum_ratio_width_height','float')
+    b_smaller = True
+    if ratio_w_h_thr is not None:
+        rm_ratio_w_h_save_shp = io_function.get_name_by_adding_tail(polygons_shp_backup, 'rmRatioWH')
+        if remove_polygons(polygons_shp, 'ratio_w_h', ratio_w_h_thr, b_smaller, rm_ratio_w_h_save_shp) is False:
+            basic.outputlogMessage("error, removing polygons based on ratio_w_h failed")
+        else:
+            polygons_shp = rm_ratio_w_h_save_shp
+    else:
+        basic.outputlogMessage('warning, minimum_ratio_w_h is absent in the para file, skip removing polygons based on minimum ratio_w_h')
 
     # copy to final output
     copy_shape_file(polygons_shp,output)
