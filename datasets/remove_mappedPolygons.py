@@ -109,8 +109,8 @@ def remove_polygons_main(polygons_shp, output, para_file):
     b_smaller = True
     if dem_small_thr is not None:
         rm_dem_save_shp = io_function.get_name_by_adding_tail(polygons_shp_backup, 'rmDEM')
-        if remove_polygons(polygons_shp, 'dem_mean', dem_small_thr, b_smaller, rm_dem_save_shp) is False:
-            basic.outputlogMessage("error, removing polygons based on dem_mean failed")
+        if remove_polygons(polygons_shp, 'dem_min', dem_small_thr, b_smaller, rm_dem_save_shp) is False:
+            basic.outputlogMessage("error, removing polygons based on dem_min failed")
         else:
             polygons_shp = rm_dem_save_shp
     else:
