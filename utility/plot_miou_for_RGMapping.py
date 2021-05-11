@@ -18,7 +18,7 @@ def wall_time_to_relative_time(wall_time_list):
 
 def plot_miou_step_time(train_dict, val_dict):
 
-    fig, ax = plt.subplots(2, 1, sharey='col', sharex='col', tight_layout=True, figsize=(7.5, 6), gridspec_kw={'hspace': 0})
+    fig, ax = plt.subplots(2, 1, sharey='col', sharex='col', tight_layout=True, figsize=(6, 6), gridspec_kw={'hspace': 0})
 
     # ax1 = fig.add_subplot(212)
     ax[1].plot(val_dict['step'], val_dict['class_0'], linestyle='-', color='tab:red', label="Background", linewidth=0.8)
