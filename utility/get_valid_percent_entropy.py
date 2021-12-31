@@ -13,13 +13,15 @@ from optparse import OptionParser
 
 code_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 sys.path.insert(0, code_dir)
+import numpy as np
+import matplotlib
+import rasterio
 import datasets.raster_io as raster_io
 
 import basic_src.io_function as io_function
 import basic_src.basic as basic
 
-import numpy as np
-import matplotlib
+
 # must be before importing matplotlib.pyplot or pylab!
 if os.name == 'posix' and "DISPLAY" not in os.environ:
     matplotlib.use('Agg')

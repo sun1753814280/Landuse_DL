@@ -43,12 +43,23 @@ def remove_previous_data(para_file):
         io_function.delete_file_or_dir(subLabel_dir_delete)
         print('remove %s '% subLabel_dir_delete)
 
-    if os.path.isdir('split_images'):
-        io_function.delete_file_or_dir('split_images')
-        print('remove %s '% 'split_images')
-    if os.path.isdir('split_labels'):
-        io_function.delete_file_or_dir('split_labels')
-        print('remove %s ' % 'split_labels')
+    if os.path.isdir('train_split_images'):
+        io_function.delete_file_or_dir('train_split_images')
+        print('remove %s '% 'train_split_images')
+    if os.path.isdir('train_split_labels'):
+        io_function.delete_file_or_dir('train_split_labels')
+        print('remove %s ' % 'train_split_labels')
+        
+    if os.path.isdir('val_split_images'):
+        io_function.delete_file_or_dir('val_split_images')
+        print('remove %s '% 'val_split_images')
+    if os.path.isdir('val_split_labels'):
+        io_function.delete_file_or_dir('val_split_labels')
+        print('remove %s ' % 'val_split_labels')
+        
+    if os.path.isdir('list'):
+        io_function.delete_file_or_dir('list')
+        print('remove %s '% 'list')
 
     images_including_aug= os.path.join('list', 'images_including_aug.txt')
     if os.path.isfile(images_including_aug):

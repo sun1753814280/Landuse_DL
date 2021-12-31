@@ -9,6 +9,9 @@ add time: 25 December, 2019
 modified on 19 January, 2021
 """
 
+import matplotlib
+import numpy as np
+import rasterio
 import os,sys
 from optparse import OptionParser
 
@@ -21,6 +24,8 @@ import utility.get_valid_percent_entropy as get_valid_percent_entropy
 import basic_src.io_function as io_function
 import datasets.raster_io as raster_io
 import time
+import parameters
+from datasets.train_test_split import train_test_split_new
 
 def get_subImage_subLabel_one_shp(get_subImage_script,all_train_shp, buffersize, dstnodata, rectangle_ext, train_shp,
                                   input_image_dir, file_pattern = None, process_num=1):
@@ -61,9 +66,15 @@ def get_sub_images_multi_regions(para_file):
     buffersize = parameters.get_string_parameters(para_file, 'buffer_size')
     rectangle_ext = parameters.get_string_parameters(para_file, 'b_use_rectangle')
     process_num = parameters.get_digit_parameters(para_file,'process_num', 'int')
+    
+    if os.path.isdir('list'):
+        io_function.delete_file_or_dir('list')
+        
+    io_function.mkdir('list')
+    sub_image_label_txt = 'sub_images_labels_list.txt'
 
-    if os.path.isfile('sub_images_labels_list.txt'):
-        io_function.delete_file_or_dir('sub_images_labels_list.txt')
+    if os.path.isfile(sub_image_label_txt):
+        io_function.delete_file_or_dir(sub_image_label_txt)
 
     subImage_dir = parameters.get_string_parameters_None_if_absence(para_file,'input_train_dir')
     subLabel_dir = parameters.get_string_parameters_None_if_absence(para_file,'input_label_dir')
@@ -93,7 +104,7 @@ def get_sub_images_multi_regions(para_file):
     io_function.mkdir(subImage_dir_delete)
     io_function.mkdir(subLabel_dir_delete)
     get_valid_percent_entropy.plot_valid_entropy(subImage_dir)
-    with open('sub_images_labels_list.txt','r') as f_obj:
+    with open(sub_image_label_txt,'r') as f_obj:
         lines = f_obj.readlines()
         for line in lines:
             image_path, label_path = line.strip().split(':')
@@ -106,7 +117,7 @@ def get_sub_images_multi_regions(para_file):
                 io_function.movefiletodir(image_path,subImage_dir_delete)
                 io_function.movefiletodir(label_path,subLabel_dir_delete)
     if len(delete_sub_image_label_list) > 0:
-        with open('sub_images_labels_list.txt', 'w') as f_obj:
+        with open(sub_image_label_txt, 'w') as f_obj:
             for line in new_sub_image_label_list:
                 f_obj.writelines(line)
 
@@ -129,7 +140,8 @@ def get_sub_images_multi_regions(para_file):
         width_list.append(width)
     # save info to file, if it exists, it will be overwritten
     img_count = len(new_sub_image_label_list)
-    with open('sub_images_patches_info.txt','w') as f_obj:
+    sub_image_info_txt = os.path.join('list','sub_images_patches_info.txt')
+    with open(sub_image_info_txt,'w') as f_obj:
         f_obj.writelines('information of sub-images: \n')
         f_obj.writelines('number of sub-images : %d \n' % img_count)
         f_obj.writelines('band count : %d \n'%band_count)
@@ -137,7 +149,56 @@ def get_sub_images_multi_regions(para_file):
         f_obj.writelines('maximum width and height: %d, %d \n'% (max(width_list), max(height_list)) )
         f_obj.writelines('minimum width and height: %d, %d \n'% (min(width_list), min(height_list)) )
         f_obj.writelines('mean width and height: %.2f, %.2f \n\n'% (sum(width_list)/img_count, sum(height_list)/img_count))
+    
+    with open(sub_image_label_txt,'r') as f_obj:
+        
+        lines = f_obj.readlines()
+        
+        positive_sub_image_label_list = []
+        negative_sub_image_label_list = []
+        
+        for line in lines:
+            
+            image_path, label_path = line.strip().split(':')
+            
+            # get the class label
+            image_class_label = image_path[-5:-4]
+            label_class_label = label_path[-5:-4]
+            
+            if image_class_label == '1' and label_class_label == '1':
+                positive_sub_image_label_list.append(line)
+                
+            elif image_class_label == '0' and label_class_label == '0':
+                negative_sub_image_label_list.append(line)
+    
+    positive_sub_image_label_txt = os.path.join('list','positive_sub_images_labels_list.txt')
+    negative_sub_image_label_txt = os.path.join('list','negative_sub_images_labels_list.txt')
+                
+    if os.path.isfile(positive_sub_image_label_txt):
+        io_function.delete_file_or_dir(positive_sub_image_label_txt)
+    if os.path.isfile(negative_sub_image_label_txt):
+        io_function.delete_file_or_dir(negative_sub_image_label_txt)
+            
+    with open(positive_sub_image_label_txt,'w') as f_obj:
+        for line in positive_sub_image_label_list:
+            f_obj.writelines(line)
+                
+    with open(negative_sub_image_label_txt,'w') as f_obj:
+        for line in negative_sub_image_label_list:
+            f_obj.writelines(line)
 
+    training_data_per = parameters.get_digit_parameters_None_if_absence(para_file, 'training_data_per','float')
+    train_sub_image_label_txt = os.path.join('list','training_sub_images_labels.txt')
+    val_sub_image_label_txt = os.path.join('list','validation_sub_images_labels.txt')
+
+    if os.path.isfile(train_sub_image_label_txt):
+        io_function.delete_file_or_dir(train_sub_image_label_txt)
+    if os.path.isfile(val_sub_image_label_txt):
+        io_function.delete_file_or_dir(val_sub_image_label_txt)
+  
+    Do_shuffle = True
+
+    train_test_split_new(positive_sub_image_label_list,negative_sub_image_label_list,training_data_per,Do_shuffle,train_sub_image_label_txt,val_sub_image_label_txt)
 
     duration= time.time() - SECONDS
     os.system('echo "$(date): time cost of getting sub images and labels: %.2f seconds">>time_cost.txt'%duration)

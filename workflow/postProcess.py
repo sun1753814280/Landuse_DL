@@ -20,15 +20,57 @@ import basic_src.io_function as io_function
 sys.path.insert(0, os.path.join(code_dir, 'datasets'))
 from merge_shapefiles import merge_shape_files
 import utility.eva_report_to_tables as eva_report_to_tables
-
+import basic
 from datasets.get_polygon_attributes import add_polygon_attributes
 from datasets.remove_mappedPolygons import remove_polygons_main
 from datasets.evaluation_result import evaluation_polygons
-
+import geopandas as gpd
 # need for calculating the occurrence.
 cd_dir = os.path.expanduser('~/codes/PycharmProjects/ChangeDet_DL/thawSlumpChangeDet')
 sys.path.insert(0, cd_dir)
 import polygons_change_analyze
+
+
+def area_based_evaluation(val_path,shp_post,evaluation_txt=None):
+
+    df1 = gpd.read_file(val_path)
+    df2 = gpd.read_file(shp_post)
+    
+    # calculate the area for validatino and inference shapefiles
+    val_area = df1.area.sum()
+    inf_area = df2.area.sum()
+    
+    # calculate areas for TP, FN, and FP regions: intersection, union, difference
+    tp = gpd.overlay(df1,df2,how='intersection')
+    fn = gpd.overlay(df1,df2,how='difference')
+    fp = gpd.overlay(df2,df1,how='difference')
+
+    # compute the areas for TP, FN, and FP
+    TP = tp.area.sum()
+    FN = fn.area.sum()
+    FP = fp.area.sum()
+
+    # compute the area-based metrics: precision, recall, F1_score, IoU
+    precision = TP/(TP + FP)
+    recall = TP/(TP + FN)
+    F1_score = 2*precision*recall/(precision+recall)
+    IoU = TP/(TP + FP + FN)
+    
+    #output evaluation reslult
+    if evaluation_txt is None:
+        evaluation_txt = "evaluation_report.txt"
+    f_obj = open(evaluation_txt,'w')
+    f_obj.writelines('Areas of validation polygons: %.6f\n'%val_area)
+    f_obj.writelines('Areas of inference polygons: %.6f\n'%inf_area)
+    f_obj.writelines('Areas of TP regions: %.6f\n'%TP)
+    f_obj.writelines('Areas of FP regions: %.6f\n'%FP)
+    f_obj.writelines('Areas of FN regions: %.6f\n'%FN)
+    f_obj.writelines('Precision: %.6f\n'%precision)
+    f_obj.writelines('Recall: %.6f\n'%recall)
+    f_obj.writelines('F1 score: %.6f\n'%F1_score)
+    f_obj.writelines('IoU: %.6f\n'%IoU)
+    f_obj.close()
+
 
 def inf_results_to_shapefile(curr_dir,img_idx, area_save_dir, test_id):
 
@@ -154,6 +196,7 @@ def postProcess(para_file,inf_post_note, b_skip_getshp=False,test_id=None):
     sub_tasks = []
     same_area_time_inis =  group_same_area_time_observations(multi_inf_regions)
     region_eva_reports = {}
+    region_eva_reports_new = {}
     for key in same_area_time_inis.keys():
         multi_observations = same_area_time_inis[key]
         area_name = parameters.get_string_parameters(multi_observations[0], 'area_name')  # they have the same name and time
@@ -210,8 +253,17 @@ def postProcess(para_file,inf_post_note, b_skip_getshp=False,test_id=None):
 
             # evaluate the mapping results
             # eval_shp_script = os.path.join(code_dir,'datasets', 'evaluation_result.py')
+            
+            # evaluation result
             out_report = os.path.join(WORK_DIR, area_save_dir, shp_pre+'_evaluation_report.txt')
+            area_based_out_report = os.path.join(WORK_DIR, area_save_dir, shp_pre+'_area_based_evaluation_report.txt')
             # evaluation_polygons(eval_shp_script, shp_post, para_file, area_ini,out_report)
+            val_path = parameters.get_file_path_parameters_None_if_absence(area_ini,'validation_shape')
+
+            basic.outputlogMessage('Start evaluation, input: %s, validation file: %s'%(shp_post, val_path))
+                
+            area_based_evaluation(val_path,shp_post,area_based_out_report)
+        
             evaluation_polygons(shp_post,para_file,area_ini,out_report)
 
 
@@ -227,18 +279,23 @@ def postProcess(para_file,inf_post_note, b_skip_getshp=False,test_id=None):
                 bak_post_shp = os.path.join(backup_dir_area, '_'.join([shp_pre,'post',test_note]) + '.shp')
                 bak_eva_report = os.path.join(backup_dir_area, '_'.join([shp_pre,'eva_report',test_note]) + '.txt')
                 bak_area_ini = os.path.join(backup_dir_area, '_'.join([shp_pre,'region',test_note]) + '.ini')
+                bak_eva_report_new = os.path.join(backup_dir_area, '_'.join([shp_pre,'eva_report_new',test_note]) + '.txt')
             else:
                 bak_merged_shp = os.path.join(backup_dir_area, '_'.join([shp_pre]) + '.shp')
                 bak_post_shp = os.path.join(backup_dir_area, '_'.join([shp_pre, 'post']) + '.shp')
                 bak_eva_report = os.path.join(backup_dir_area, '_'.join([shp_pre, 'eva_report']) + '.txt')
                 bak_area_ini = os.path.join(backup_dir_area, '_'.join([shp_pre, 'region']) + '.ini')
+                bak_eva_report_new = os.path.join(backup_dir_area, '_'.join([shp_pre, 'eva_report_new']) + '.txt')
 
             io_function.copy_shape_file(merged_shp,bak_merged_shp)
             io_function.copy_shape_file(shp_post, bak_post_shp)
             io_function.copy_file_to_dst(out_report, bak_eva_report, overwrite=True)
             io_function.copy_file_to_dst(area_ini, bak_area_ini, overwrite=True)
+            io_function.copy_file_to_dst(area_based_out_report, bak_eva_report_new, overwrite=True)
 
             region_eva_reports[shp_pre] = bak_eva_report
+            
+            region_eva_reports_new[shp_pre] = bak_eva_report_new
 
 
 
@@ -260,6 +317,13 @@ def postProcess(para_file,inf_post_note, b_skip_getshp=False,test_id=None):
         report = region_eva_reports[key]
         print('evaluation report for %s:'%key)
         os.system('head -n 7 %s'%report)
+        
+    # output the evaluation report to screen
+    for key in region_eva_reports_new.keys():
+        report = region_eva_reports_new[key]
+        print('evaluation report for %s:'%key)
+        os.system('head -n 10 %s'%report)
+
 
     # output evaluation report to table
     if len(test_note) > 0:

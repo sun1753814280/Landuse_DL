@@ -21,8 +21,8 @@ def plot_miou_step_time(train_dict, val_dict):
     fig, ax = plt.subplots(2, 1, sharey='col', sharex='col', tight_layout=True, figsize=(6, 6), gridspec_kw={'hspace': 0})
 
     # ax1 = fig.add_subplot(212)
-    ax[1].plot(val_dict['step'], val_dict['class_0'], linestyle=':', color='black', label="Background", linewidth=1)
-    ax[1].plot(val_dict['step'], val_dict['class_1'], linestyle='-', color='black', label="Rock glaciers", linewidth=0.8)
+    ax[1].plot(val_dict['step'], val_dict['class_0'], linestyle='-', color='tab:red', label="Background", linewidth=0.8)
+    ax[1].plot(val_dict['step'], val_dict['class_1'], linestyle='-', color='tab:blue', label="Rock glaciers", linewidth=0.8)
     ax[1].plot(val_dict['step'], val_dict['overall'], 'k-.', label="Overall", linewidth=0.8)
     ax[1].legend(fontsize=10, loc="lower right")
     ax[1].set_xlim([0, max(val_dict['step'])])
@@ -32,8 +32,8 @@ def plot_miou_step_time(train_dict, val_dict):
     ax[1].grid(axis='both', ls='--', alpha=0.5, lw=0.4, color='grey')
 
     # ax2 = fig.add_subplot(211, sharex=ax1, sharey=ax1)
-    ax[0].plot(train_dict['step'], train_dict['class_0'], linestyle=':', color='black', label="Background", linewidth=1)
-    ax[0].plot(train_dict['step'], train_dict['class_1'], linestyle='-', color='black', label="Rock glaciers", linewidth=0.8)
+    ax[0].plot(train_dict['step'], train_dict['class_0'], linestyle='-', color='tab:red', label="Background", linewidth=0.8)
+    ax[0].plot(train_dict['step'], train_dict['class_1'], linestyle='-', color='tab:blue', label="Rock glaciers", linewidth=0.8)
     ax[0].plot(train_dict['step'], train_dict['overall'], 'k-.', label="Overall", linewidth=0.8)
     ax[0].grid(axis='both', ls='--', alpha=0.5, lw=0.4, color='grey')
     ax[0].set_ylabel('Training IoU')
@@ -43,7 +43,7 @@ def plot_miou_step_time(train_dict, val_dict):
     ax2.set_xlim([min_t, max_t])
     ax2.set_xlabel("Training time (hours)", fontsize=10)
 
-    plt.savefig('/Users/huyan/Data/WKL/Plots/IoU_new.png', dpi=300)
+    plt.savefig('/Users/huyan/Data/WKL/Plots/IoU.png', dpi=300)
     # plt.show()
 
 
